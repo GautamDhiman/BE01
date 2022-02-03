@@ -5,15 +5,22 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from rest_framework.parsers import JSONParser
 from .models import Tasks
-from .serializers import TaskSerializer
+from .serializers import TaskSerializer, UserSerializer
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
 class TaskApiView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
 
     def get(self, request):
         
@@ -36,6 +43,9 @@ class TaskApiView(APIView):
 
 
 class TaskDetails(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self, id, request):
         try:
@@ -67,3 +77,18 @@ class TaskDetails(APIView):
         task = self.get_object(id, request)
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class RegisterUser(APIView):
+
+    def post(self, request):
+        serializer = UserSerializer(data = request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            
+            user = User.objects.get(username=serializer.data['username'])
+            token_obj, _ = Token.objects.get_or_create(user=user)
+
+            return Response({'data' : serializer.data, 'token' : str(token_obj) ,'status' :status.HTTP_201_CREATED})
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
