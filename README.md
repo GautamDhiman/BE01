@@ -1,5 +1,6 @@
 ## Local setup
 * run `pip install -r requirements.txt`
+* install `redis`
 * Browse and Enjoy APIs I buit
 
 ## API endpoints
@@ -31,5 +32,6 @@
 
 ## Features
 * HMAC based Token Authentication and Authorization
+* Power Of Redis Cache
 * DjangoRest Framework
 * CRUD operations
