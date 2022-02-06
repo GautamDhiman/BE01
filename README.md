@@ -1,6 +1,8 @@
 ## Local setup
 * run `pip install -r requirements.txt`
 * install `redis`
+* ORM -> Django ORM (Pre built)
+* Access ORM by `python manage.py shell`
 * Browse and Enjoy APIs I buit
 
 ## API endpoints
