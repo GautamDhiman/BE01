@@ -1,12 +1,11 @@
-from django.shortcuts import render
-from django.http import Http404
-from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.views.decorators.cache import cache_page
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from rest_framework.parsers import JSONParser
 from .models import Tasks
 from .serializers import TaskSerializer, UserSerializer
-from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +20,7 @@ class TaskApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-
+    @cache_page(CACHE_TTL)
     def get(self, request):
         
         tasks = Tasks.objects.filter(owner=request.user)
@@ -29,6 +28,7 @@ class TaskApiView(APIView):
         
         return Response(serializer.data)
 
+    @cache_page(CACHE_TTL)
     def post(self, request):
         
         request.data['owner'] = request.user.id
@@ -57,12 +57,13 @@ class TaskDetails(APIView):
         except Tasks.DoesNotExist:
             return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         
-        
+    @cache_page(CACHE_TTL)
     def get(self, request, id):
         task = self.get_object(id, request)
         serializer = TaskSerializer(task)
         return Response(serializer.data)
     
+    @cache_page(CACHE_TTL)
     def put(self, request, id):
         task = self.get_object(id, request)
         serializer = TaskSerializer(task, data = request.data)
